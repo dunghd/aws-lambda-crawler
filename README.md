@@ -47,3 +47,19 @@ pip install -r requirements.txt -t package/
 cp -r crawler handler.py local_runner.py package/
 cd package && zip -r ../deployment.zip .
 ```
+
+Deploy with AWS SAM:
+
+1. Ensure AWS CLI is configured with credentials.
+2. Build and deploy with SAM:
+
+```bash
+sam build --use-container
+sam deploy --guided
+```
+
+Notes on crawler improvements:
+
+- `crawler/fetcher.py` now honors `robots.txt` when possible and includes a small retry/backoff strategy.
+- If a site blocks or refuses `robots.txt`, the fetcher will assume allowed.
+- The `pyproject.toml` now uses `tool.poetry.group.dev.dependencies` for dev deps and accepts Python `>=3.9,<4.0`.
