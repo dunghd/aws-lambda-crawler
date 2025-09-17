@@ -1,4 +1,4 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="utf-8" />
@@ -9,12 +9,22 @@
     <h1>Test Lambda Handler</h1>
     <form id="invokeForm" method="post" action="/invoke">
       <label>URL (simple test):</label>
-      <input type="text" name="url" placeholder="https://example.com" style="width:400px" />
-      <br/><br/>
+      <input
+        type="text"
+        name="url"
+        placeholder="https://example.com"
+        style="width: 400px"
+      />
+      <br /><br />
       <label>Raw JSON payload (optional):</label>
-      <br/>
-      <textarea name="payload" rows="6" cols="80" placeholder='{"url": "https://example.com"}'></textarea>
-      <br/>
+      <br />
+      <textarea
+        name="payload"
+        rows="6"
+        cols="80"
+        placeholder='{"url": "https://example.com"}'
+      ></textarea>
+      <br />
       <button type="submit">Invoke</button>
     </form>
 
