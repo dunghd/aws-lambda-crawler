@@ -2,11 +2,34 @@ from flask import Flask, render_template, request, jsonify
 import json
 import os
 import sys
+from pathlib import Path
 
 # Ensure project root is importable
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 if ROOT not in sys.path:
     sys.path.insert(0, ROOT)
+
+# Load Confluence token from `dzun-local/confluence-api-token` when no
+# environment variable is provided. This makes running `python app.py`
+# from the `webapp` folder behave like `python -m webapp.app` (which
+# executes `webapp.__init__`).
+def _load_confluence_token_from_file() -> None:
+    if os.getenv("CONFLUENCE_API_TOKEN") or os.getenv("CONFLUENCE_BEARER_TOKEN"):
+        return
+    token_path = Path(__file__).resolve().parents[1] / "dzun-local" / "confluence-api-token"
+    try:
+        if token_path.is_file():
+            token = token_path.read_text(encoding="utf8").strip()
+            if token:
+                if not os.getenv("CONFLUENCE_USER"):
+                    os.environ.setdefault("CONFLUENCE_BEARER_TOKEN", token)
+                else:
+                    os.environ.setdefault("CONFLUENCE_API_TOKEN", token)
+    except Exception:
+        pass
+
+
+_load_confluence_token_from_file()
 
 import handler
 
