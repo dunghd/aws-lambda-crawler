@@ -5,6 +5,8 @@ import urllib.parse
 import urllib.robotparser
 from typing import Optional
 
+from crawler.secrets import get_confluence_credentials
+
 import requests
 from requests.exceptions import RequestException
 from requests.auth import HTTPBasicAuth
@@ -41,16 +43,18 @@ def fetch_html(url: str, timeout: int = 10, max_retries: int = 2, backoff: float
     Returns HTML text on success or None on error / disallowed by robots.
     """
     headers = {"User-Agent": "aws-lambda-crawler/1.0 (+https://example.com)"}
-    # Support optional Confluence authentication via environment variables:
-    # - Basic auth: set CONFLUENCE_USER and CONFLUENCE_API_TOKEN (or CONFLUENCE_PASSWORD)
-    # - Bearer token: set CONFLUENCE_BEARER_TOKEN
+    # Support optional Confluence authentication via Secrets Manager or environment variables:
+    # - Preferred: store secret in AWS Secrets Manager and set CONFLUENCE_SECRET_NAME in env
+    #   Secret should be JSON like {"user":"...","token":"..."} or {"bearer":"..."}
+    # - Fallback: Basic auth via CONFLUENCE_USER + CONFLUENCE_API_TOKEN or CONFLUENCE_PASSWORD
     auth = None
-    bearer = os.getenv("CONFLUENCE_BEARER_TOKEN")
+    creds = get_confluence_credentials()
+    bearer = creds.get("bearer")
     if bearer:
         headers["Authorization"] = f"Bearer {bearer}"
     else:
-        user = os.getenv("CONFLUENCE_USER")
-        token = os.getenv("CONFLUENCE_API_TOKEN") or os.getenv("CONFLUENCE_PASSWORD")
+        user = creds.get("user") or os.getenv("CONFLUENCE_USER")
+        token = creds.get("token") or os.getenv("CONFLUENCE_API_TOKEN") or os.getenv("CONFLUENCE_PASSWORD")
         if user and token:
             auth = HTTPBasicAuth(user, token)
     parsed = urllib.parse.urlparse(url)
