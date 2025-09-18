@@ -60,8 +60,8 @@ def get_confluence_credentials() -> Dict[str, str]:
         _cached_secret = {}
         return _cached_secret
 
-    client = boto3.client("secretsmanager")
     try:
+        client = boto3.client("secretsmanager")
         resp = client.get_secret_value(SecretId=secret_name)
         secret_string = resp.get("SecretString")
         if not secret_string:
@@ -78,8 +78,9 @@ def get_confluence_credentials() -> Dict[str, str]:
         except json.JSONDecodeError:
             _cached_secret = {"token": secret_string}
             return _cached_secret
-    except (BotoCoreError, ClientError) as e:
-        # Do not raise; log and fallback to empty
+    except Exception as e:
+        # Do not raise; log and fallback to empty. Catch broader exceptions
+        # because boto3 may raise different exception types in some environments.
         print(f"Failed to load secret '{secret_name}': {e}")
         _cached_secret = {}
         return _cached_secret
