@@ -57,6 +57,16 @@ Resources:
           Properties:
             Path: /crawl
             Method: post
+            RestApiId: !Ref CrawlerApi
+
+  CrawlerApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: Prod
+      Cors:
+        AllowMethods: "'POST,OPTIONS'"
+        AllowHeaders: "'Content-Type,Authorization'"
+        AllowOrigin: "'http://localhost:3000'"
 
 Outputs:
   ConfluenceSecretNameOutput:
@@ -66,3 +76,7 @@ Outputs:
   CrawlerExecutionRoleArn:
     Description: 'ARN of the Lambda execution role'
     Value: !GetAtt CrawlerExecutionRole.Arn
+
+  CrawlerApiInvokeUrl:
+    Description: 'Invoke URL for the crawler API'
+    Value: !Sub 'https://${CrawlerApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/crawl'
